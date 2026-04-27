@@ -5,6 +5,7 @@ import Dashboard from "./pages/dashboard"
 import Orders from "./pages/orders"
 import Customers from "./pages/customers"
 import Products from "./pages/products"
+import ProductImages from "./pages/product-images"
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="/orders" element={<Orders />} />
           <Route path="/customers" element={<Customers />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/products/:productId/images" element={<ProductImages />} />
         </Route>
       </Routes>
     </BrowserRouter>

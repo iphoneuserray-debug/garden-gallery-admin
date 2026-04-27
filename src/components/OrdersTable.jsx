@@ -30,7 +30,7 @@ function SortableHead({ label, field, sort, onSort }) {
   )
 }
 
-const EMPTY_ORDER = { customer: "", status: "pending", paymentMethod: "", totalAud: "" }
+const EMPTY_ORDER = { customer: "", status: "pending", paymentMethod: "", totalAud: "", note: "" }
 
 export function OrdersTable({ orders = [], onAdd, onDelete }) {
   const [expandedId, setExpandedId] = useState(null)
@@ -78,6 +78,7 @@ export function OrdersTable({ orders = [], onAdd, onDelete }) {
             <SortableHead label="Payment Method" field="paymentMethod" sort={sort} onSort={handleSort} />
             <SortableHead label="Total" field="total" sort={sort} onSort={handleSort} />
             <SortableHead label="Date" field="date" sort={sort} onSort={handleSort} />
+            <TableHead>Note</TableHead>
             <TableHead />
           </TableRow>
         </TableHeader>
@@ -103,6 +104,9 @@ export function OrdersTable({ orders = [], onAdd, onDelete }) {
               </TableCell>
               <TableCell>—</TableCell>
               <TableCell>
+                <input value={newValues.note} onChange={setNew("note")} placeholder="Note" className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
+              </TableCell>
+              <TableCell>
                 <div className="flex gap-2">
                   <button onClick={saveNew} className="rounded bg-primary px-2 py-1 text-xs text-primary-foreground">Save</button>
                   <button onClick={() => setAdding(false)} className="rounded border px-2 py-1 text-xs">Cancel</button>
@@ -123,6 +127,7 @@ export function OrdersTable({ orders = [], onAdd, onDelete }) {
                 <TableCell>{order.paymentMethod}</TableCell>
                 <TableCell>${Number(order.totalAud).toFixed(2)}</TableCell>
                 <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
+                <TableCell>{order.note ?? "—"}</TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <button
                     onClick={() => setDeletingOrder(order)}
@@ -134,7 +139,7 @@ export function OrdersTable({ orders = [], onAdd, onDelete }) {
               </TableRow>
               {expandedId === order.id && (
                 <TableRow key={`${order.id}-items`}>
-                  <TableCell colSpan={7} className="bg-muted/30 p-4">
+                  <TableCell colSpan={8} className="bg-muted/30 p-4">
                     <OrderItemsTable items={order.items} />
                   </TableCell>
                 </TableRow>

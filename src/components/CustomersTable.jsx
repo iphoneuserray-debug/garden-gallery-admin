@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ChevronUpIcon, ChevronDownIcon, ChevronsUpDownIcon, PlusIcon, Trash2Icon } from "lucide-react"
+import { ChevronUpIcon, ChevronDownIcon, ChevronsUpDownIcon, PlusIcon, Trash2Icon, PencilIcon } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -123,28 +123,26 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
             return (
               <TableRow
                 key={customer.id}
-                className={isEditing ? "" : "cursor-pointer"}
-                onClick={() => { if (!isEditing) startEdit(customer) }}
               >
                 <TableCell className="font-mono text-xs text-muted-foreground">{customer.id}</TableCell>
                 <TableCell>
                   {isEditing
-                    ? <input value={editValues.name} onChange={set("name")} onClick={(e) => e.stopPropagation()} className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
+                    ? <input value={editValues.name} onChange={set("name")}className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
                     : customer.name}
                 </TableCell>
                 <TableCell>
                   {isEditing
-                    ? <input value={editValues.email} onChange={set("email")} onClick={(e) => e.stopPropagation()} className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
+                    ? <input value={editValues.email} onChange={set("email")}className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
                     : customer.email}
                 </TableCell>
                 <TableCell>
                   {isEditing
-                    ? <input value={editValues.phone} onChange={set("phone")} onClick={(e) => e.stopPropagation()} className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
+                    ? <input value={editValues.phone} onChange={set("phone")}className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
                     : (customer.phone ?? "—")}
                 </TableCell>
                 <TableCell className={isEditing ? "" : "font-mono text-xs text-muted-foreground"}>
                   {isEditing
-                    ? <input value={editValues.stripeCustomerId} onChange={set("stripeCustomerId")} onClick={(e) => e.stopPropagation()} className="w-full rounded border border-input bg-background px-2 py-1 font-mono text-xs" />
+                    ? <input value={editValues.stripeCustomerId} onChange={set("stripeCustomerId")}className="w-full rounded border border-input bg-background px-2 py-1 font-mono text-xs" />
                     : (customer.stripeCustomerId ?? "—")}
                 </TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
@@ -154,12 +152,20 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
                       <button onClick={cancelEdit} className="rounded border px-2 py-1 text-xs">Cancel</button>
                     </div>
                   ) : (
-                    <button
-                      onClick={() => setDeletingCustomer(customer)}
-                      className="rounded p-1 text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2Icon className="size-4" />
-                    </button>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => startEdit(customer)}
+                        className="rounded p-1 text-muted-foreground hover:text-foreground"
+                      >
+                        <PencilIcon className="size-4" />
+                      </button>
+                      <button
+                        onClick={() => setDeletingCustomer(customer)}
+                        className="rounded p-1 text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2Icon className="size-4" />
+                      </button>
+                    </div>
                   )}
                 </TableCell>
               </TableRow>
