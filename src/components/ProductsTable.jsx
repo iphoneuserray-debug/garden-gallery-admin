@@ -84,7 +84,7 @@ function SortableHead({ label, field, sort, onSort }) {
 
 const EMPTY_PRODUCT = { name: "", description: "", priceAud: "", availability: true, tags: [] }
 
-export function ProductsTable({ products = [], onUpdate, onAdd, onDelete, onImageUpload, onImageDelete }) {
+export function ProductsTable({ products = [], onUpdate, onAdd, onDelete, onImageUpload, onImageDelete, onSetCover, onLoadImages }) {
   const allTags = [...new Set(products.flatMap((p) => p.tags ?? []))]
   const [search, setSearch] = useState("")
   const [sort, setSort] = useState({ field: null, dir: "asc" })
@@ -134,7 +134,10 @@ export function ProductsTable({ products = [], onUpdate, onAdd, onDelete, onImag
   }
 
   const toggleExpand = (id) => {
-    setExpandedId((prev) => (prev === id ? null : id))
+    setExpandedId((prev) => {
+      if (prev !== id) onLoadImages?.(id)
+      return prev === id ? null : id
+    })
   }
 
   return (
@@ -196,12 +199,13 @@ export function ProductsTable({ products = [], onUpdate, onAdd, onDelete, onImag
           {products.map((product) => {
             const isEditing = editingId === product.id
             const isExpanded = expandedId === product.id
+            const isPending = product.id.startsWith("temp_")
             return (
               <>
                 <TableRow
                   key={product.id}
-                  className="cursor-pointer"
-                  onClick={() => { if (!isEditing) toggleExpand(product.id) }}
+                  className={isPending ? "opacity-50 pointer-events-none" : "cursor-pointer"}
+                  onClick={() => { if (!isEditing && !isPending) toggleExpand(product.id) }}
                 >
                   <TableCell>
                     {isEditing
@@ -279,6 +283,7 @@ export function ProductsTable({ products = [], onUpdate, onAdd, onDelete, onImag
                         images={product.images ?? []}
                         onUpload={(file) => onImageUpload?.(product.id, file)}
                         onDelete={(imgId) => onImageDelete?.(product.id, imgId)}
+                        onSetCover={(imgId) => onSetCover?.(product.id, imgId)}
                       />
                     </TableCell>
                   </TableRow>

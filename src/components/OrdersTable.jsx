@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ChevronUpIcon, ChevronDownIcon, ChevronsUpDownIcon, PlusIcon, Trash2Icon } from "lucide-react"
+import { ChevronUpIcon, ChevronDownIcon, ChevronsUpDownIcon } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -30,15 +30,10 @@ function SortableHead({ label, field, sort, onSort }) {
   )
 }
 
-const EMPTY_ORDER = { customer: "", status: "pending", paymentMethod: "", totalAud: "", note: "" }
-
-export function OrdersTable({ orders = [], onAdd, onDelete }) {
+export function OrdersTable({ orders = [], onStatusUpdate }) {
   const [expandedId, setExpandedId] = useState(null)
   const [search, setSearch] = useState("")
   const [sort, setSort] = useState({ field: null, dir: "asc" })
-  const [adding, setAdding] = useState(false)
-  const [newValues, setNewValues] = useState(EMPTY_ORDER)
-  const [deletingOrder, setDeletingOrder] = useState(null)
 
   const handleSort = (field) => {
     setSort((prev) =>
@@ -48,26 +43,10 @@ export function OrdersTable({ orders = [], onAdd, onDelete }) {
     )
   }
 
-  const setNew = (key) => (e) =>
-    setNewValues((v) => ({ ...v, [key]: e.target.value }))
-
-  const saveNew = () => {
-    onAdd?.(newValues)
-    setNewValues(EMPTY_ORDER)
-    setAdding(false)
-  }
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <SearchForm value={search} onChange={setSearch} placeholder="Search orders..." />
-        <button
-          onClick={() => setAdding(true)}
-          className="flex items-center gap-1.5 rounded bg-primary px-3 py-1.5 text-sm text-primary-foreground"
-        >
-          <PlusIcon className="size-4" />
-          Add New
-        </button>
       </div>
       <Table>
         <TableHeader>
@@ -79,41 +58,9 @@ export function OrdersTable({ orders = [], onAdd, onDelete }) {
             <SortableHead label="Total" field="total" sort={sort} onSort={handleSort} />
             <SortableHead label="Date" field="date" sort={sort} onSort={handleSort} />
             <TableHead>Note</TableHead>
-            <TableHead />
           </TableRow>
         </TableHeader>
         <TableBody>
-          {adding && (
-            <TableRow>
-              <TableCell>—</TableCell>
-              <TableCell>
-                <input value={newValues.customer} onChange={setNew("customer")} placeholder="Customer ID" className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
-              </TableCell>
-              <TableCell>
-                <select value={newValues.status} onChange={setNew("status")} className="rounded border border-input bg-background px-2 py-1 text-sm">
-                  <option value="pending">Pending</option>
-                  <option value="paid">Paid</option>
-                  <option value="failed">Failed</option>
-                </select>
-              </TableCell>
-              <TableCell>
-                <input value={newValues.paymentMethod} onChange={setNew("paymentMethod")} placeholder="Payment method" className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
-              </TableCell>
-              <TableCell>
-                <input type="number" value={newValues.totalAud} onChange={setNew("totalAud")} placeholder="0.00" className="w-24 rounded border border-input bg-background px-2 py-1 text-sm" />
-              </TableCell>
-              <TableCell>—</TableCell>
-              <TableCell>
-                <input value={newValues.note} onChange={setNew("note")} placeholder="Note" className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
-              </TableCell>
-              <TableCell>
-                <div className="flex gap-2">
-                  <button onClick={saveNew} className="rounded bg-primary px-2 py-1 text-xs text-primary-foreground">Save</button>
-                  <button onClick={() => setAdding(false)} className="rounded border px-2 py-1 text-xs">Cancel</button>
-                </div>
-              </TableCell>
-            </TableRow>
-          )}
           {orders.map((order) => (
             <>
               <TableRow
@@ -123,23 +70,25 @@ export function OrdersTable({ orders = [], onAdd, onDelete }) {
               >
                 <TableCell className="font-mono text-xs text-muted-foreground">{order.id}</TableCell>
                 <TableCell>{order.customer?.name ?? order.customer?.email ?? order.customer?.id}</TableCell>
-                <TableCell className={statusStyles[order.status] ?? ""}>{order.status}</TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <select
+                    value={order.status}
+                    onChange={(e) => onStatusUpdate?.(order.id, e.target.value)}
+                    className={`rounded border border-input bg-background px-2 py-1 text-sm ${statusStyles[order.status] ?? ""}`}
+                  >
+                    <option value="pending">pending</option>
+                    <option value="paid">paid</option>
+                    <option value="failed">failed</option>
+                  </select>
+                </TableCell>
                 <TableCell>{order.paymentMethod}</TableCell>
                 <TableCell>${Number(order.totalAud).toFixed(2)}</TableCell>
                 <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
                 <TableCell>{order.note ?? "—"}</TableCell>
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <button
-                    onClick={() => setDeletingOrder(order)}
-                    className="rounded p-1 text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2Icon className="size-4" />
-                  </button>
-                </TableCell>
               </TableRow>
               {expandedId === order.id && (
                 <TableRow key={`${order.id}-items`}>
-                  <TableCell colSpan={8} className="bg-muted/30 p-4">
+                  <TableCell colSpan={7} className="bg-muted/30 p-4">
                     <OrderItemsTable items={order.items} />
                   </TableCell>
                 </TableRow>
@@ -148,31 +97,6 @@ export function OrdersTable({ orders = [], onAdd, onDelete }) {
           ))}
         </TableBody>
       </Table>
-
-      {deletingOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-sm rounded-lg bg-background p-6 shadow-lg">
-            <h2 className="text-base font-semibold">Delete order?</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Order <span className="font-medium text-foreground">#{deletingOrder.id}</span> will be permanently deleted. This action cannot be undone.
-            </p>
-            <div className="mt-4 flex justify-end gap-2">
-              <button onClick={() => setDeletingOrder(null)} className="rounded border px-3 py-1.5 text-sm">
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  onDelete?.(deletingOrder.id)
-                  setDeletingOrder(null)
-                }}
-                className="rounded bg-destructive px-3 py-1.5 text-sm text-destructive-foreground"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

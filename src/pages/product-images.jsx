@@ -50,13 +50,35 @@ export default function ProductImages() {
   }
 
   const handleDelete = async (imageId) => {
+    setDeletingId(null)
+    setImages((prev) => prev.filter((img) => img.id !== imageId))
     try {
       await api.deleteProductImage(productId, imageId)
-      setImages((prev) => prev.filter((img) => img.id !== imageId))
     } catch (err) {
+      api.getProductImages(productId).then(setImages)
       alert(`Delete failed: ${err.message}`)
-    } finally {
-      setDeletingId(null)
+    }
+  }
+
+  const handleSetCover = async (imageId) => {
+    const minSort = Math.min(...images.map((i) => i.sortOrder ?? 0))
+    const cover = images.find((i) => i.sortOrder === minSort)
+    const target = images.find((i) => i.id === imageId)
+    if (!target || target.id === cover?.id) return
+    setImages((prev) => prev.map((img) => {
+      if (img.id === target.id) return { ...img, sortOrder: cover.sortOrder }
+      if (img.id === cover.id) return { ...img, sortOrder: target.sortOrder }
+      return img
+    }))
+    try {
+      const updated = await api.setCoverImage(productId, imageId)
+      setImages((prev) => prev.map((img) => {
+        const u = updated.find((u) => u.id === img.id)
+        return u ? { ...img, sortOrder: u.sortOrder } : img
+      }))
+    } catch (err) {
+      api.getProductImages(productId).then(setImages)
+      alert(`Failed to set cover: ${err.message}`)
     }
   }
 
@@ -106,7 +128,11 @@ export default function ProductImages() {
                   </TableCell>
                 </TableRow>
               )}
-              {images.map((img, index) => (
+              {(() => {
+                const minSort = images.length > 0 ? Math.min(...images.map((i) => i.sortOrder ?? 0)) : null
+                return images.map((img) => {
+                  const isCover = img.sortOrder === minSort
+                  return (
                 <TableRow key={img.id}>
                   <TableCell>
                     <img
@@ -117,11 +143,20 @@ export default function ProductImages() {
                   </TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">{img.url}</TableCell>
                   <TableCell>
-                    {index === 0 && (
+                    {isCover ? (
                       <span className="flex items-center gap-1 text-xs text-yellow-600 font-medium">
                         <StarIcon className="size-3 fill-yellow-500 text-yellow-500" />
                         Cover
                       </span>
+                    ) : (
+                      <button
+                        onClick={() => handleSetCover(img.id)}
+                        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-yellow-600"
+                        title="Set as cover"
+                      >
+                        <StarIcon className="size-3" />
+                        Set cover
+                      </button>
                     )}
                   </TableCell>
                   <TableCell>
@@ -133,7 +168,9 @@ export default function ProductImages() {
                     </button>
                   </TableCell>
                 </TableRow>
-              ))}
+                  )
+                })
+              })()}
             </TableBody>
           </Table>
         </>

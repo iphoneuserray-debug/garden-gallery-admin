@@ -23,7 +23,7 @@ function SortableHead({ label, field, sort, onSort }) {
   )
 }
 
-const EMPTY_CUSTOMER = { name: "", email: "", phone: "", stripeCustomerId: "" }
+const EMPTY_CUSTOMER = { name: "", email: "", phone: "", gender: "", wechatNumber: "", stripeCustomerId: "" }
 
 export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
   const [search, setSearch] = useState("")
@@ -48,6 +48,8 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
       name: customer.name,
       email: customer.email,
       phone: customer.phone ?? "",
+      gender: customer.gender ?? "",
+      wechatNumber: customer.wechatNumber ?? "",
       stripeCustomerId: customer.stripeCustomerId ?? "",
     })
   }
@@ -71,6 +73,8 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
     setAdding(false)
   }
 
+  const inputCls = "w-full rounded border border-input bg-background px-2 py-1 text-sm"
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -90,6 +94,8 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
             <SortableHead label="Name" field="name" sort={sort} onSort={handleSort} />
             <SortableHead label="Email" field="email" sort={sort} onSort={handleSort} />
             <SortableHead label="Phone" field="phone" sort={sort} onSort={handleSort} />
+            <SortableHead label="Gender" field="gender" sort={sort} onSort={handleSort} />
+            <SortableHead label="WeChat" field="wechatNumber" sort={sort} onSort={handleSort} />
             <SortableHead label="Stripe ID" field="stripeCustomerId" sort={sort} onSort={handleSort} />
             <TableHead />
           </TableRow>
@@ -98,18 +104,19 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
           {adding && (
             <TableRow>
               <TableCell>—</TableCell>
+              <TableCell><input value={newValues.name} onChange={setNew("name")} placeholder="Name" className={inputCls} /></TableCell>
+              <TableCell><input value={newValues.email} onChange={setNew("email")} placeholder="Email" className={inputCls} /></TableCell>
+              <TableCell><input value={newValues.phone} onChange={setNew("phone")} placeholder="Phone" className={inputCls} /></TableCell>
               <TableCell>
-                <input value={newValues.name} onChange={setNew("name")} placeholder="Name" className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
+                <select value={newValues.gender} onChange={setNew("gender")} className={inputCls}>
+                  <option value="">—</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
               </TableCell>
-              <TableCell>
-                <input value={newValues.email} onChange={setNew("email")} placeholder="Email" className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
-              </TableCell>
-              <TableCell>
-                <input value={newValues.phone} onChange={setNew("phone")} placeholder="Phone" className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
-              </TableCell>
-              <TableCell>
-                <input value={newValues.stripeCustomerId} onChange={setNew("stripeCustomerId")} placeholder="Stripe ID" className="w-full rounded border border-input bg-background px-2 py-1 text-sm font-mono text-xs" />
-              </TableCell>
+              <TableCell><input value={newValues.wechatNumber} onChange={setNew("wechatNumber")} placeholder="WeChat" className={inputCls} /></TableCell>
+              <TableCell><input value={newValues.stripeCustomerId} onChange={setNew("stripeCustomerId")} placeholder="Stripe ID" className={`${inputCls} font-mono text-xs`} /></TableCell>
               <TableCell>
                 <div className="flex gap-2">
                   <button onClick={saveNew} className="rounded bg-primary px-2 py-1 text-xs text-primary-foreground">Save</button>
@@ -120,32 +127,51 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
           )}
           {customers.map((customer) => {
             const isEditing = editingId === customer.id
+            const isPending = customer.id.startsWith("temp_")
             return (
               <TableRow
                 key={customer.id}
+                className={isPending ? "opacity-50 pointer-events-none" : ""}
               >
                 <TableCell className="font-mono text-xs text-muted-foreground">{customer.id}</TableCell>
                 <TableCell>
                   {isEditing
-                    ? <input value={editValues.name} onChange={set("name")}className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
+                    ? <input value={editValues.name} onChange={set("name")} className={inputCls} />
                     : customer.name}
                 </TableCell>
                 <TableCell>
                   {isEditing
-                    ? <input value={editValues.email} onChange={set("email")}className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
+                    ? <input value={editValues.email} onChange={set("email")} className={inputCls} />
                     : customer.email}
                 </TableCell>
                 <TableCell>
                   {isEditing
-                    ? <input value={editValues.phone} onChange={set("phone")}className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
+                    ? <input value={editValues.phone} onChange={set("phone")} className={inputCls} />
                     : (customer.phone ?? "—")}
+                </TableCell>
+                <TableCell>
+                  {isEditing
+                    ? (
+                      <select value={editValues.gender} onChange={set("gender")} className={inputCls}>
+                        <option value="">—</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
+                    )
+                    : (customer.gender ?? "—")}
+                </TableCell>
+                <TableCell>
+                  {isEditing
+                    ? <input value={editValues.wechatNumber} onChange={set("wechatNumber")} placeholder="WeChat" className={inputCls} />
+                    : (customer.wechatNumber ?? "—")}
                 </TableCell>
                 <TableCell className={isEditing ? "" : "font-mono text-xs text-muted-foreground"}>
                   {isEditing
-                    ? <input value={editValues.stripeCustomerId} onChange={set("stripeCustomerId")}className="w-full rounded border border-input bg-background px-2 py-1 font-mono text-xs" />
+                    ? <input value={editValues.stripeCustomerId} onChange={set("stripeCustomerId")} className={`${inputCls} font-mono text-xs`} />
                     : (customer.stripeCustomerId ?? "—")}
                 </TableCell>
-                <TableCell onClick={(e) => e.stopPropagation()}>
+                <TableCell>
                   {isEditing ? (
                     <div className="flex gap-2">
                       <button onClick={() => saveEdit(customer.id)} className="rounded bg-primary px-2 py-1 text-xs text-primary-foreground">Save</button>
@@ -153,16 +179,10 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
                     </div>
                   ) : (
                     <div className="flex gap-1">
-                      <button
-                        onClick={() => startEdit(customer)}
-                        className="rounded p-1 text-muted-foreground hover:text-foreground"
-                      >
+                      <button onClick={() => startEdit(customer)} className="rounded p-1 text-muted-foreground hover:text-foreground">
                         <PencilIcon className="size-4" />
                       </button>
-                      <button
-                        onClick={() => setDeletingCustomer(customer)}
-                        className="rounded p-1 text-muted-foreground hover:text-destructive"
-                      >
+                      <button onClick={() => setDeletingCustomer(customer)} className="rounded p-1 text-muted-foreground hover:text-destructive">
                         <Trash2Icon className="size-4" />
                       </button>
                     </div>
@@ -182,14 +202,9 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
               <span className="font-medium text-foreground">{deletingCustomer.name}</span> will be permanently deleted. This action cannot be undone.
             </p>
             <div className="mt-4 flex justify-end gap-2">
-              <button onClick={() => setDeletingCustomer(null)} className="rounded border px-3 py-1.5 text-sm">
-                Cancel
-              </button>
+              <button onClick={() => setDeletingCustomer(null)} className="rounded border px-3 py-1.5 text-sm">Cancel</button>
               <button
-                onClick={() => {
-                  onDelete?.(deletingCustomer.id)
-                  setDeletingCustomer(null)
-                }}
+                onClick={() => { onDelete?.(deletingCustomer.id); setDeletingCustomer(null) }}
                 className="rounded bg-destructive px-3 py-1.5 text-sm text-destructive-foreground"
               >
                 Delete

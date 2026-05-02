@@ -15,28 +15,41 @@ export default function Customers() {
   }, [])
 
   const handleAdd = async (values) => {
+    const tempId = `temp_${Date.now()}`
+    setCustomers((prev) => [...prev, { ...values, id: tempId, stripeCustomerId: values.stripeCustomerId || null }])
     try {
       const created = await api.createCustomer(values)
-      setCustomers((prev) => [...prev, created])
+      setCustomers((prev) => prev.map((c) => (c.id === tempId ? created : c)))
     } catch (e) {
+      setCustomers((prev) => prev.filter((c) => c.id !== tempId))
       alert(`Failed to create customer: ${e.message}`)
     }
   }
 
   const handleUpdate = async (id, values) => {
+    const original = customers.find((c) => c.id === id)
+    setCustomers((prev) => prev.map((c) => (c.id === id ? { ...c, ...values } : c)))
     try {
       const updated = await api.updateCustomer(id, values)
       setCustomers((prev) => prev.map((c) => (c.id === id ? updated : c)))
     } catch (e) {
+      setCustomers((prev) => prev.map((c) => (c.id === id ? original : c)))
       alert(`Failed to update customer: ${e.message}`)
     }
   }
 
   const handleDelete = async (id) => {
+    const index = customers.findIndex((c) => c.id === id)
+    const removed = customers[index]
+    setCustomers((prev) => prev.filter((c) => c.id !== id))
     try {
       await api.deleteCustomer(id)
-      setCustomers((prev) => prev.filter((c) => c.id !== id))
     } catch (e) {
+      setCustomers((prev) => {
+        const next = [...prev]
+        next.splice(index, 0, removed)
+        return next
+      })
       alert(`Failed to delete customer: ${e.message}`)
     }
   }

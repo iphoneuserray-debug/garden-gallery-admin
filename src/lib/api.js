@@ -35,6 +35,8 @@ export const api = {
   },
   deleteProductImage: (productId, imageId) =>
     request(`/products/${productId}/images/${imageId}`, { method: 'DELETE' }),
+  setCoverImage: (productId, imageId) =>
+    request(`/products/${productId}/images/${imageId}/cover`, { method: 'PATCH' }),
 
   // Orders
   getOrders: () => request('/orders'),
