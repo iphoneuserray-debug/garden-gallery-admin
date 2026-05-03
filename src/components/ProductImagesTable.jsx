@@ -28,7 +28,7 @@ export function ProductImagesTable({ images = [], onUpload, onDelete, onSetCover
               {isCover ? (
                 <span
                   className="absolute left-1 top-1 rounded bg-black/60 p-0.5 text-yellow-400"
-                  title="Cover image"
+                  title="封面图片"
                 >
                   <StarIcon className="size-3 fill-yellow-400" />
                 </span>
@@ -36,7 +36,7 @@ export function ProductImagesTable({ images = [], onUpload, onDelete, onSetCover
                 <button
                   onClick={() => onSetCover?.(img.id)}
                   className="absolute left-1 top-1 rounded bg-black/60 p-0.5 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:text-yellow-400"
-                  title="Set as cover"
+                  title="设为封面"
                 >
                   <StarIcon className="size-3" />
                 </button>
@@ -45,12 +45,12 @@ export function ProductImagesTable({ images = [], onUpload, onDelete, onSetCover
           )
         })}
         {images.length === 0 && (
-          <p className="text-sm text-muted-foreground">No images yet.</p>
+          <p className="text-sm text-muted-foreground">暂无图片。</p>
         )}
       </div>
       <label className="flex w-fit cursor-pointer items-center gap-1.5 rounded border border-dashed px-3 py-1.5 text-sm text-muted-foreground hover:border-primary hover:text-primary">
         <UploadIcon className="size-4" />
-        Upload image
+        上传图片
         <input type="file" accept="image/*" className="sr-only" onChange={handleFile} />
       </label>
     </div>

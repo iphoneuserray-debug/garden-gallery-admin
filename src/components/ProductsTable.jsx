@@ -11,6 +11,9 @@ import {
 } from "@/components/ui/table"
 import { SearchForm } from "@/components/search-form"
 import { ProductImagesTable } from "@/components/ProductImagesTable"
+import { Pagination } from "@/components/Pagination"
+
+const PAGE_SIZE = 10
 
 function TagEditor({ value = [], onChange, allTags = [] }) {
   const [input, setInput] = useState("")
@@ -88,6 +91,7 @@ export function ProductsTable({ products = [], onUpdate, onAdd, onDelete, onImag
   const allTags = [...new Set(products.flatMap((p) => p.tags ?? []))]
   const [search, setSearch] = useState("")
   const [sort, setSort] = useState({ field: null, dir: "asc" })
+  const [page, setPage] = useState(1)
   const [expandedId, setExpandedId] = useState(null)
   const [editingId, setEditingId] = useState(null)
   const [editValues, setEditValues] = useState({})
@@ -95,12 +99,15 @@ export function ProductsTable({ products = [], onUpdate, onAdd, onDelete, onImag
   const [newValues, setNewValues] = useState(EMPTY_PRODUCT)
   const [deletingProduct, setDeletingProduct] = useState(null)
 
+  const handleSearch = (v) => { setSearch(v); setPage(1) }
+
   const handleSort = (field) => {
     setSort((prev) =>
       prev.field === field
         ? { field, dir: prev.dir === "asc" ? "desc" : "asc" }
         : { field, dir: "asc" }
     )
+    setPage(1)
   }
 
   const startEdit = (product) => {
@@ -121,11 +128,8 @@ export function ProductsTable({ products = [], onUpdate, onAdd, onDelete, onImag
     setEditingId(null)
   }
 
-  const set = (key) => (e) =>
-    setEditValues((v) => ({ ...v, [key]: e.target.value }))
-
-  const setNew = (key) => (e) =>
-    setNewValues((v) => ({ ...v, [key]: e.target.value }))
+  const set = (key) => (e) => setEditValues((v) => ({ ...v, [key]: e.target.value }))
+  const setNew = (key) => (e) => setNewValues((v) => ({ ...v, [key]: e.target.value }))
 
   const saveNew = () => {
     onAdd?.(newValues)
@@ -140,26 +144,49 @@ export function ProductsTable({ products = [], onUpdate, onAdd, onDelete, onImag
     })
   }
 
+  const filtered = products.filter((p) => {
+    const q = search.toLowerCase()
+    return (
+      !q ||
+      p.name?.toLowerCase().includes(q) ||
+      p.description?.toLowerCase().includes(q) ||
+      p.tags?.some((t) => t.toLowerCase().includes(q))
+    )
+  })
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (!sort.field) return 0
+    let av = a[sort.field] ?? ""
+    let bv = b[sort.field] ?? ""
+    if (sort.field === "priceAud") { av = Number(av); bv = Number(bv) }
+    if (av < bv) return sort.dir === "asc" ? -1 : 1
+    if (av > bv) return sort.dir === "asc" ? 1 : -1
+    return 0
+  })
+
+  const totalPages = Math.ceil(sorted.length / PAGE_SIZE)
+  const paginated = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <SearchForm value={search} onChange={setSearch} placeholder="Search products..." />
+        <SearchForm value={search} onChange={handleSearch} placeholder="搜索商品…" />
         <button
           onClick={() => setAdding(true)}
           className="flex items-center gap-1.5 rounded bg-primary px-3 py-1.5 text-sm text-primary-foreground"
         >
           <PlusIcon className="size-4" />
-          Add New
+          新增
         </button>
       </div>
       <Table>
         <TableHeader>
           <TableRow>
-            <SortableHead label="Name" field="name" sort={sort} onSort={handleSort} />
-            <SortableHead label="Description" field="description" sort={sort} onSort={handleSort} />
-            <SortableHead label="Price" field="priceAud" sort={sort} onSort={handleSort} />
-            <TableHead>Tags</TableHead>
-            <SortableHead label="Available" field="availability" sort={sort} onSort={handleSort} />
+            <SortableHead label="名称" field="name" sort={sort} onSort={handleSort} />
+            <SortableHead label="描述" field="description" sort={sort} onSort={handleSort} />
+            <SortableHead label="价格" field="priceAud" sort={sort} onSort={handleSort} />
+            <TableHead>标签</TableHead>
+            <SortableHead label="上架" field="availability" sort={sort} onSort={handleSort} />
             <TableHead />
           </TableRow>
         </TableHeader>
@@ -167,36 +194,32 @@ export function ProductsTable({ products = [], onUpdate, onAdd, onDelete, onImag
           {adding && (
             <TableRow>
               <TableCell>
-                <input value={newValues.name} onChange={setNew("name")} placeholder="Name" className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
+                <input value={newValues.name} onChange={setNew("name")} placeholder="名称" className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
               </TableCell>
               <TableCell>
-                <input value={newValues.description} onChange={setNew("description")} placeholder="Description" className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
+                <input value={newValues.description} onChange={setNew("description")} placeholder="描述" className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
               </TableCell>
               <TableCell>
                 <input type="number" value={newValues.priceAud} onChange={setNew("priceAud")} placeholder="0.00" className="w-24 rounded border border-input bg-background px-2 py-1 text-sm" />
               </TableCell>
               <TableCell>
-                <TagEditor
-                  value={newValues.tags}
-                  onChange={(tags) => setNewValues((v) => ({ ...v, tags }))}
-                  allTags={allTags}
-                />
+                <TagEditor value={newValues.tags} onChange={(tags) => setNewValues((v) => ({ ...v, tags }))} allTags={allTags} />
               </TableCell>
               <TableCell>
                 <select value={newValues.availability ? "yes" : "no"} onChange={(e) => setNewValues((v) => ({ ...v, availability: e.target.value === "yes" }))} className="rounded border border-input bg-background px-2 py-1 text-sm">
-                  <option value="yes">Yes</option>
-                  <option value="no">No</option>
+                  <option value="yes">是</option>
+                  <option value="no">否</option>
                 </select>
               </TableCell>
               <TableCell>
                 <div className="flex gap-2">
-                  <button onClick={saveNew} className="rounded bg-primary px-2 py-1 text-xs text-primary-foreground">Save</button>
-                  <button onClick={() => setAdding(false)} className="rounded border px-2 py-1 text-xs">Cancel</button>
+                  <button onClick={saveNew} className="rounded bg-primary px-2 py-1 text-xs text-primary-foreground">保存</button>
+                  <button onClick={() => setAdding(false)} className="rounded border px-2 py-1 text-xs">取消</button>
                 </div>
               </TableCell>
             </TableRow>
           )}
-          {products.map((product) => {
+          {paginated.map((product) => {
             const isEditing = editingId === product.id
             const isExpanded = expandedId === product.id
             const isPending = product.id.startsWith("temp_")
@@ -209,12 +232,12 @@ export function ProductsTable({ products = [], onUpdate, onAdd, onDelete, onImag
                 >
                   <TableCell>
                     {isEditing
-                      ? <input value={editValues.name} onChange={set("name")} onClick={(e) => e.stopPropagation()} className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
+                      ? <input value={editValues.name} onChange={set("name")} onClick={(e) => e.stopPropagation()} placeholder="名称" className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
                       : product.name}
                   </TableCell>
                   <TableCell className={isEditing ? "" : "max-w-xs truncate text-muted-foreground"}>
                     {isEditing
-                      ? <input value={editValues.description} onChange={set("description")} onClick={(e) => e.stopPropagation()} className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
+                      ? <input value={editValues.description} onChange={set("description")} onClick={(e) => e.stopPropagation()} placeholder="描述" className="w-full rounded border border-input bg-background px-2 py-1 text-sm" />
                       : (product.description ?? "—")}
                   </TableCell>
                   <TableCell>
@@ -224,11 +247,7 @@ export function ProductsTable({ products = [], onUpdate, onAdd, onDelete, onImag
                   </TableCell>
                   <TableCell>
                     {isEditing
-                      ? <TagEditor
-                          value={editValues.tags}
-                          onChange={(tags) => setEditValues((v) => ({ ...v, tags }))}
-                          allTags={allTags}
-                        />
+                      ? <TagEditor value={editValues.tags} onChange={(tags) => setEditValues((v) => ({ ...v, tags }))} allTags={allTags} />
                       : product.tags?.length
                         ? <div className="flex flex-wrap gap-1">
                             {product.tags.map((tag) => (
@@ -240,36 +259,26 @@ export function ProductsTable({ products = [], onUpdate, onAdd, onDelete, onImag
                   <TableCell>
                     {isEditing
                       ? <select value={editValues.availability ? "yes" : "no"} onChange={(e) => setEditValues((v) => ({ ...v, availability: e.target.value === "yes" }))} onClick={(e) => e.stopPropagation()} className="rounded border border-input bg-background px-2 py-1 text-sm">
-                          <option value="yes">Yes</option>
-                          <option value="no">No</option>
+                          <option value="yes">是</option>
+                          <option value="no">否</option>
                         </select>
-                      : (product.availability ? "Yes" : "No")}
+                      : (product.availability ? "是" : "否")}
                   </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     {isEditing ? (
                       <div className="flex gap-2">
-                        <button onClick={() => saveEdit(product.id)} className="rounded bg-primary px-2 py-1 text-xs text-primary-foreground">Save</button>
-                        <button onClick={cancelEdit} className="rounded border px-2 py-1 text-xs">Cancel</button>
+                        <button onClick={() => saveEdit(product.id)} className="rounded bg-primary px-2 py-1 text-xs text-primary-foreground">保存</button>
+                        <button onClick={cancelEdit} className="rounded border px-2 py-1 text-xs">取消</button>
                       </div>
                     ) : (
                       <div className="flex gap-1">
-                        <Link
-                          to={`/products/${product.id}/images`}
-                          className="rounded p-1 text-muted-foreground hover:text-foreground"
-                          title="Manage images"
-                        >
+                        <Link to={`/products/${product.id}/images`} className="rounded p-1 text-muted-foreground hover:text-foreground" title="管理图片">
                           <ImagesIcon className="size-4" />
                         </Link>
-                        <button
-                          onClick={() => startEdit(product)}
-                          className="rounded p-1 text-muted-foreground hover:text-foreground"
-                        >
+                        <button onClick={() => startEdit(product)} className="rounded p-1 text-muted-foreground hover:text-foreground">
                           <PencilIcon className="size-4" />
                         </button>
-                        <button
-                          onClick={() => setDeletingProduct(product)}
-                          className="rounded p-1 text-muted-foreground hover:text-destructive"
-                        >
+                        <button onClick={() => setDeletingProduct(product)} className="rounded p-1 text-muted-foreground hover:text-destructive">
                           <Trash2Icon className="size-4" />
                         </button>
                       </div>
@@ -293,26 +302,22 @@ export function ProductsTable({ products = [], onUpdate, onAdd, onDelete, onImag
           })}
         </TableBody>
       </Table>
+      <Pagination page={page} totalPages={totalPages} total={sorted.length} pageSize={PAGE_SIZE} onChange={setPage} />
 
       {deletingProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm rounded-lg bg-background p-6 shadow-lg">
-            <h2 className="text-base font-semibold">Delete product?</h2>
+            <h2 className="text-base font-semibold">删除商品？</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">{deletingProduct.name}</span> will be permanently deleted. This action cannot be undone.
+              <span className="font-medium text-foreground">{deletingProduct.name}</span> 将被永久删除，此操作不可撤销。
             </p>
             <div className="mt-4 flex justify-end gap-2">
-              <button onClick={() => setDeletingProduct(null)} className="rounded border px-3 py-1.5 text-sm">
-                Cancel
-              </button>
+              <button onClick={() => setDeletingProduct(null)} className="rounded border px-3 py-1.5 text-sm">取消</button>
               <button
-                onClick={() => {
-                  onDelete?.(deletingProduct.id)
-                  setDeletingProduct(null)
-                }}
+                onClick={() => { onDelete?.(deletingProduct.id); setDeletingProduct(null) }}
                 className="rounded bg-destructive px-3 py-1.5 text-sm text-destructive-foreground"
               >
-                Delete
+                删除
               </button>
             </div>
           </div>

@@ -132,8 +132,8 @@ export default function Products() {
 
   return (
     <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold">Products</h1>
-      {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
+      <h1 className="text-2xl font-bold">商品</h1>
+      {loading && <p className="text-sm text-muted-foreground">加载中…</p>}
       {error && <p className="text-sm text-destructive">{error}</p>}
       {!loading && !error && (
         <ProductsTable

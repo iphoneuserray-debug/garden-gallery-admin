@@ -9,6 +9,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { SearchForm } from "@/components/search-form"
+import { Pagination } from "@/components/Pagination"
+
+const PAGE_SIZE = 10
 
 function SortableHead({ label, field, sort, onSort }) {
   const active = sort.field === field
@@ -28,11 +31,14 @@ const EMPTY_CUSTOMER = { name: "", email: "", phone: "", gender: "", wechatNumbe
 export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
   const [search, setSearch] = useState("")
   const [sort, setSort] = useState({ field: null, dir: "asc" })
+  const [page, setPage] = useState(1)
   const [editingId, setEditingId] = useState(null)
   const [editValues, setEditValues] = useState({})
   const [adding, setAdding] = useState(false)
   const [newValues, setNewValues] = useState(EMPTY_CUSTOMER)
   const [deletingCustomer, setDeletingCustomer] = useState(null)
+
+  const handleSearch = (v) => { setSearch(v); setPage(1) }
 
   const handleSort = (field) => {
     setSort((prev) =>
@@ -40,6 +46,7 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
         ? { field, dir: prev.dir === "asc" ? "desc" : "asc" }
         : { field, dir: "asc" }
     )
+    setPage(1)
   }
 
   const startEdit = (customer) => {
@@ -61,11 +68,8 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
     setEditingId(null)
   }
 
-  const set = (key) => (e) =>
-    setEditValues((v) => ({ ...v, [key]: e.target.value }))
-
-  const setNew = (key) => (e) =>
-    setNewValues((v) => ({ ...v, [key]: e.target.value }))
+  const set = (key) => (e) => setEditValues((v) => ({ ...v, [key]: e.target.value }))
+  const setNew = (key) => (e) => setNewValues((v) => ({ ...v, [key]: e.target.value }))
 
   const saveNew = () => {
     onAdd?.(newValues)
@@ -75,28 +79,51 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
 
   const inputCls = "w-full rounded border border-input bg-background px-2 py-1 text-sm"
 
+  const filtered = customers.filter((c) => {
+    const q = search.toLowerCase()
+    return (
+      !q ||
+      c.name?.toLowerCase().includes(q) ||
+      c.email?.toLowerCase().includes(q) ||
+      c.phone?.toLowerCase().includes(q) ||
+      c.wechatNumber?.toLowerCase().includes(q)
+    )
+  })
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (!sort.field) return 0
+    const av = a[sort.field] ?? ""
+    const bv = b[sort.field] ?? ""
+    if (av < bv) return sort.dir === "asc" ? -1 : 1
+    if (av > bv) return sort.dir === "asc" ? 1 : -1
+    return 0
+  })
+
+  const totalPages = Math.ceil(sorted.length / PAGE_SIZE)
+  const paginated = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <SearchForm value={search} onChange={setSearch} placeholder="Search customers..." />
+        <SearchForm value={search} onChange={handleSearch} placeholder="搜索客户…" />
         <button
           onClick={() => setAdding(true)}
           className="flex items-center gap-1.5 rounded bg-primary px-3 py-1.5 text-sm text-primary-foreground"
         >
           <PlusIcon className="size-4" />
-          Add New
+          新增
         </button>
       </div>
       <Table>
         <TableHeader>
           <TableRow>
-            <SortableHead label="ID" field="id" sort={sort} onSort={handleSort} />
-            <SortableHead label="Name" field="name" sort={sort} onSort={handleSort} />
-            <SortableHead label="Email" field="email" sort={sort} onSort={handleSort} />
-            <SortableHead label="Phone" field="phone" sort={sort} onSort={handleSort} />
-            <SortableHead label="Gender" field="gender" sort={sort} onSort={handleSort} />
-            <SortableHead label="WeChat" field="wechatNumber" sort={sort} onSort={handleSort} />
-            <SortableHead label="Stripe ID" field="stripeCustomerId" sort={sort} onSort={handleSort} />
+            <SortableHead label="编号" field="id" sort={sort} onSort={handleSort} />
+            <SortableHead label="姓名" field="name" sort={sort} onSort={handleSort} />
+            <SortableHead label="邮箱" field="email" sort={sort} onSort={handleSort} />
+            <SortableHead label="电话" field="phone" sort={sort} onSort={handleSort} />
+            <SortableHead label="性别" field="gender" sort={sort} onSort={handleSort} />
+            <SortableHead label="微信" field="wechatNumber" sort={sort} onSort={handleSort} />
+            <SortableHead label="Stripe编号" field="stripeCustomerId" sort={sort} onSort={handleSort} />
             <TableHead />
           </TableRow>
         </TableHeader>
@@ -104,36 +131,33 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
           {adding && (
             <TableRow>
               <TableCell>—</TableCell>
-              <TableCell><input value={newValues.name} onChange={setNew("name")} placeholder="Name" className={inputCls} /></TableCell>
-              <TableCell><input value={newValues.email} onChange={setNew("email")} placeholder="Email" className={inputCls} /></TableCell>
-              <TableCell><input value={newValues.phone} onChange={setNew("phone")} placeholder="Phone" className={inputCls} /></TableCell>
+              <TableCell><input value={newValues.name} onChange={setNew("name")} placeholder="姓名" className={inputCls} /></TableCell>
+              <TableCell><input value={newValues.email} onChange={setNew("email")} placeholder="邮箱" className={inputCls} /></TableCell>
+              <TableCell><input value={newValues.phone} onChange={setNew("phone")} placeholder="电话" className={inputCls} /></TableCell>
               <TableCell>
                 <select value={newValues.gender} onChange={setNew("gender")} className={inputCls}>
                   <option value="">—</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
+                  <option value="male">男</option>
+                  <option value="female">女</option>
+                  <option value="other">其他</option>
                 </select>
               </TableCell>
-              <TableCell><input value={newValues.wechatNumber} onChange={setNew("wechatNumber")} placeholder="WeChat" className={inputCls} /></TableCell>
+              <TableCell><input value={newValues.wechatNumber} onChange={setNew("wechatNumber")} placeholder="微信号" className={inputCls} /></TableCell>
               <TableCell><input value={newValues.stripeCustomerId} onChange={setNew("stripeCustomerId")} placeholder="Stripe ID" className={`${inputCls} font-mono text-xs`} /></TableCell>
               <TableCell>
                 <div className="flex gap-2">
-                  <button onClick={saveNew} className="rounded bg-primary px-2 py-1 text-xs text-primary-foreground">Save</button>
-                  <button onClick={() => setAdding(false)} className="rounded border px-2 py-1 text-xs">Cancel</button>
+                  <button onClick={saveNew} className="rounded bg-primary px-2 py-1 text-xs text-primary-foreground">保存</button>
+                  <button onClick={() => setAdding(false)} className="rounded border px-2 py-1 text-xs">取消</button>
                 </div>
               </TableCell>
             </TableRow>
           )}
-          {customers.map((customer) => {
+          {paginated.map((customer) => {
             const isEditing = editingId === customer.id
             const isPending = customer.id.startsWith("temp_")
             return (
-              <TableRow
-                key={customer.id}
-                className={isPending ? "opacity-50 pointer-events-none" : ""}
-              >
-                <TableCell className="font-mono text-xs text-muted-foreground">{customer.id}</TableCell>
+              <TableRow key={customer.id} className={isPending ? "opacity-50 pointer-events-none" : ""}>
+                <TableCell className="font-mono text-xs text-muted-foreground">{customer.id.slice(0, 8)}…</TableCell>
                 <TableCell>
                   {isEditing
                     ? <input value={editValues.name} onChange={set("name")} className={inputCls} />
@@ -154,9 +178,9 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
                     ? (
                       <select value={editValues.gender} onChange={set("gender")} className={inputCls}>
                         <option value="">—</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
+                        <option value="male">男</option>
+                        <option value="female">女</option>
+                        <option value="other">其他</option>
                       </select>
                     )
                     : (customer.gender ?? "—")}
@@ -174,8 +198,8 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
                 <TableCell>
                   {isEditing ? (
                     <div className="flex gap-2">
-                      <button onClick={() => saveEdit(customer.id)} className="rounded bg-primary px-2 py-1 text-xs text-primary-foreground">Save</button>
-                      <button onClick={cancelEdit} className="rounded border px-2 py-1 text-xs">Cancel</button>
+                      <button onClick={() => saveEdit(customer.id)} className="rounded bg-primary px-2 py-1 text-xs text-primary-foreground">保存</button>
+                      <button onClick={cancelEdit} className="rounded border px-2 py-1 text-xs">取消</button>
                     </div>
                   ) : (
                     <div className="flex gap-1">
@@ -193,21 +217,22 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
           })}
         </TableBody>
       </Table>
+      <Pagination page={page} totalPages={totalPages} total={sorted.length} pageSize={PAGE_SIZE} onChange={setPage} />
 
       {deletingCustomer && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm rounded-lg bg-background p-6 shadow-lg">
-            <h2 className="text-base font-semibold">Delete customer?</h2>
+            <h2 className="text-base font-semibold">删除客户？</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">{deletingCustomer.name}</span> will be permanently deleted. This action cannot be undone.
+              <span className="font-medium text-foreground">{deletingCustomer.name}</span> 将被永久删除，此操作不可撤销。
             </p>
             <div className="mt-4 flex justify-end gap-2">
-              <button onClick={() => setDeletingCustomer(null)} className="rounded border px-3 py-1.5 text-sm">Cancel</button>
+              <button onClick={() => setDeletingCustomer(null)} className="rounded border px-3 py-1.5 text-sm">取消</button>
               <button
                 onClick={() => { onDelete?.(deletingCustomer.id); setDeletingCustomer(null) }}
                 className="rounded bg-destructive px-3 py-1.5 text-sm text-destructive-foreground"
               >
-                Delete
+                删除
               </button>
             </div>
           </div>

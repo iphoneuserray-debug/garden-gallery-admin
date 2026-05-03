@@ -6,6 +6,9 @@ import Orders from "./pages/orders"
 import Customers from "./pages/customers"
 import Products from "./pages/products"
 import ProductImages from "./pages/product-images"
+import PickupLocations from "./pages/pickup-locations"
+import Coupons from "./pages/coupons"
+import Transactions from "./pages/transactions"
 
 export default function App() {
   return (
@@ -15,9 +18,12 @@ export default function App() {
         <Route element={<AdminLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/orders" element={<Orders />} />
+          <Route path="/transactions" element={<Transactions />} />
           <Route path="/customers" element={<Customers />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:productId/images" element={<ProductImages />} />
+          <Route path="/pickup-locations" element={<PickupLocations />} />
+          <Route path="/coupons" element={<Coupons />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -22,26 +22,26 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
+          <CardTitle>登录账户</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            请输入邮箱以登录
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="email">邮箱</FieldLabel>
                 <Input id="email" type="email" placeholder="m@example.com" required />
               </Field>
               <Field>
                 <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <FieldLabel htmlFor="password">密码</FieldLabel>
                 </div>
                 <Input id="password" type="password" required />
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
+                <Button type="submit">登录</Button>
               </Field>
             </FieldGroup>
           </form>

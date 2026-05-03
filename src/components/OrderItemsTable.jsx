@@ -13,10 +13,10 @@ export function OrderItemsTable({ items = [] }) {
       <TableHeader>
         <TableRow>
           <TableHead>ID</TableHead>
-          <TableHead>Product</TableHead>
-          <TableHead>Quantity</TableHead>
-          <TableHead>Unit Price</TableHead>
-          <TableHead>Subtotal</TableHead>
+          <TableHead>商品</TableHead>
+          <TableHead>数量</TableHead>
+          <TableHead>单价</TableHead>
+          <TableHead>小计</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

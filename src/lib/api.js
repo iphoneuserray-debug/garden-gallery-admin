@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:3000';
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:3000';
 
 async function request(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -38,8 +38,26 @@ export const api = {
   setCoverImage: (productId, imageId) =>
     request(`/products/${productId}/images/${imageId}/cover`, { method: 'PATCH' }),
 
-  // Orders
+  // Orders (fulfillment)
   getOrders: () => request('/orders'),
-  updateOrderStatus: (id, status) =>
-    request(`/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  toggleOrderCompleted: (id, completed) =>
+    request(`/orders/${id}`, { method: 'PATCH', body: JSON.stringify({ completed }) }),
+
+  // Transactions (shopping records)
+  getTransactions: () => request('/transactions'),
+  createTransaction: (data) => request('/transactions', { method: 'POST', body: JSON.stringify(data) }),
+  updateTransactionStatus: (id, status) =>
+    request(`/transactions/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+
+  // Coupons
+  getCoupons: () => request('/coupons'),
+  createCoupon: (data) => request('/coupons', { method: 'POST', body: JSON.stringify(data) }),
+  updateCoupon: (id, data) => request(`/coupons/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteCoupon: (id) => request(`/coupons/${id}`, { method: 'DELETE' }),
+
+  // Pickup Locations
+  getPickupLocations: () => request('/pickup-locations'),
+  createPickupLocation: (data) => request('/pickup-locations', { method: 'POST', body: JSON.stringify(data) }),
+  updatePickupLocation: (id, data) => request(`/pickup-locations/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deletePickupLocation: (id) => request(`/pickup-locations/${id}`, { method: 'DELETE' }),
 };

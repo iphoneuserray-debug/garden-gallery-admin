@@ -70,24 +70,24 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
+      <h1 className="text-2xl font-bold">仪表盘</h1>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total Orders</CardDescription>
+            <CardDescription>总订单数</CardDescription>
             <CardTitle className="text-3xl">{loading ? "—" : orders.length}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Paid Orders</CardDescription>
+            <CardDescription>已付款订单</CardDescription>
             <CardTitle className="text-3xl">{loading ? "—" : paidOrders}</CardTitle>
           </CardHeader>
         </Card>
         <Card className="col-span-2 sm:col-span-1">
           <CardHeader className="pb-2">
-            <CardDescription>Revenue (12 wks)</CardDescription>
+            <CardDescription>收入（近12周）</CardDescription>
             <CardTitle className="text-3xl">{loading ? "—" : `$${totalRevenue.toFixed(2)}`}</CardTitle>
           </CardHeader>
         </Card>
@@ -95,11 +95,11 @@ export default function Dashboard() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Weekly Revenue</CardTitle>
-          <CardDescription>Paid orders · last 12 weeks</CardDescription>
+          <CardTitle>每周收入</CardTitle>
+          <CardDescription>已付款订单 · 近12周</CardDescription>
         </CardHeader>
         <CardContent>
-          {loading && <p className="text-sm text-muted-foreground py-8 text-center">Loading…</p>}
+          {loading && <p className="text-sm text-muted-foreground py-8 text-center">加载中…</p>}
           {error && <p className="text-sm text-destructive">{error}</p>}
           {!loading && !error && (
             <ChartContainer config={chartConfig} className="h-64 w-full">
@@ -121,7 +121,7 @@ export default function Dashboard() {
                 <ChartTooltip
                   content={
                     <ChartTooltipContent
-                      formatter={(value) => [`$${Number(value).toFixed(2)}`, "Revenue"]}
+                      formatter={(value) => [`$${Number(value).toFixed(2)}`, "收入"]}
                     />
                   }
                 />

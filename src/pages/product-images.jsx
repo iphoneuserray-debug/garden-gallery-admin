@@ -89,12 +89,12 @@ export default function ProductImages() {
           <ArrowLeftIcon className="size-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold">Product Images</h1>
+          <h1 className="text-2xl font-bold">商品图片</h1>
           {product && <p className="text-sm text-muted-foreground">{product.name}</p>}
         </div>
       </div>
 
-      {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {loading && <p className="text-sm text-muted-foreground">加载中…</p>}
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       {!loading && !error && (
@@ -106,7 +106,7 @@ export default function ProductImages() {
               className="flex items-center gap-1.5 rounded bg-primary px-3 py-1.5 text-sm text-primary-foreground disabled:opacity-50"
             >
               <UploadIcon className="size-4" />
-              {uploading ? "Uploading…" : "Upload Image"}
+              {uploading ? "上传中…" : "上传图片"}
             </button>
             <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
           </div>
@@ -114,9 +114,9 @@ export default function ProductImages() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-20">Preview</TableHead>
-                <TableHead>URL</TableHead>
-                <TableHead className="w-24">Cover</TableHead>
+                <TableHead className="w-20">预览</TableHead>
+                <TableHead>链接</TableHead>
+                <TableHead className="w-24">封面</TableHead>
                 <TableHead className="w-16" />
               </TableRow>
             </TableHeader>
@@ -124,7 +124,7 @@ export default function ProductImages() {
               {images.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center text-sm text-muted-foreground py-8">
-                    No images yet. Upload one to get started.
+                    暂无图片，请上传。
                   </TableCell>
                 </TableRow>
               )}
@@ -146,16 +146,16 @@ export default function ProductImages() {
                     {isCover ? (
                       <span className="flex items-center gap-1 text-xs text-yellow-600 font-medium">
                         <StarIcon className="size-3 fill-yellow-500 text-yellow-500" />
-                        Cover
+                        封面
                       </span>
                     ) : (
                       <button
                         onClick={() => handleSetCover(img.id)}
                         className="flex items-center gap-1 text-xs text-muted-foreground hover:text-yellow-600"
-                        title="Set as cover"
+                        title="设为封面"
                       >
                         <StarIcon className="size-3" />
-                        Set cover
+                        设为封面
                       </button>
                     )}
                   </TableCell>
@@ -179,15 +179,15 @@ export default function ProductImages() {
       {deletingId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm rounded-lg bg-background p-6 shadow-lg">
-            <h2 className="text-base font-semibold">Delete image?</h2>
-            <p className="mt-1 text-sm text-muted-foreground">This image will be permanently deleted.</p>
+            <h2 className="text-base font-semibold">删除图片？</h2>
+            <p className="mt-1 text-sm text-muted-foreground">此图片将被永久删除。</p>
             <div className="mt-4 flex justify-end gap-2">
-              <button onClick={() => setDeletingId(null)} className="rounded border px-3 py-1.5 text-sm">Cancel</button>
+              <button onClick={() => setDeletingId(null)} className="rounded border px-3 py-1.5 text-sm">取消</button>
               <button
                 onClick={() => handleDelete(deletingId)}
                 className="rounded bg-destructive px-3 py-1.5 text-sm text-destructive-foreground"
               >
-                Delete
+                删除
               </button>
             </div>
           </div>

@@ -14,24 +14,24 @@ export default function Orders() {
       .finally(() => setLoading(false))
   }, [])
 
-  const handleStatusUpdate = async (id, status) => {
+  const handleToggleCompleted = async (id, completed) => {
     const original = orders.find((o) => o.id === id)
-    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)))
+    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, completed } : o)))
     try {
-      const updated = await api.updateOrderStatus(id, status)
-      setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status: updated?.status ?? status } : o)))
+      const updated = await api.toggleOrderCompleted(id, completed)
+      setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, completed: updated?.completed ?? completed } : o)))
     } catch (e) {
       setOrders((prev) => prev.map((o) => (o.id === id ? original : o)))
-      alert(`Failed to update order status: ${e.message}`)
+      alert(`Failed to update order: ${e.message}`)
     }
   }
 
   return (
     <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold">Orders</h1>
-      {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
+      <h1 className="text-2xl font-bold">订单</h1>
+      {loading && <p className="text-sm text-muted-foreground">加载中…</p>}
       {error && <p className="text-sm text-destructive">{error}</p>}
-      {!loading && !error && <OrdersTable orders={orders} onStatusUpdate={handleStatusUpdate} />}
+      {!loading && !error && <OrdersTable orders={orders} onToggleCompleted={handleToggleCompleted} />}
     </div>
   )
 }
