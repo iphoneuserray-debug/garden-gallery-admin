@@ -83,6 +83,7 @@ export function TransactionsTable({ transactions = [], onStatusUpdate }) {
     if (sort.field === "customer") { av = a.customer?.name ?? ""; bv = b.customer?.name ?? "" }
     else if (sort.field === "total") { av = Number(a.totalAud ?? 0); bv = Number(b.totalAud ?? 0) }
     else if (sort.field === "date") { av = a.createdAt; bv = b.createdAt }
+    else if (sort.field === "scheduledDate") { av = a.scheduledDate ?? ""; bv = b.scheduledDate ?? "" }
     else { av = a[sort.field] ?? ""; bv = b[sort.field] ?? "" }
     if (av < bv) return sort.dir === "asc" ? -1 : 1
     if (av > bv) return sort.dir === "asc" ? 1 : -1
@@ -144,8 +145,9 @@ export function TransactionsTable({ transactions = [], onStatusUpdate }) {
             <SortableHead label="客户" field="customer" sort={sort} onSort={handleSort} />
             <SortableHead label="状态" field="status" sort={sort} onSort={handleSort} />
             <TableHead>配送方式</TableHead>
+            <SortableHead label="预约日期" field="scheduledDate" sort={sort} onSort={handleSort} />
             <SortableHead label="总额" field="total" sort={sort} onSort={handleSort} />
-            <SortableHead label="日期" field="date" sort={sort} onSort={handleSort} />
+            <SortableHead label="下单日期" field="date" sort={sort} onSort={handleSort} />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -198,12 +200,17 @@ export function TransactionsTable({ transactions = [], onStatusUpdate }) {
                     </div>
                   )}
                 </TableCell>
+                <TableCell className="text-sm">
+                  {tx.scheduledDate
+                    ? new Date(tx.scheduledDate + "T00:00:00").toLocaleDateString("zh-CN")
+                    : <span className="text-muted-foreground">—</span>}
+                </TableCell>
                 <TableCell>${Number(tx.totalAud).toFixed(2)}</TableCell>
                 <TableCell>{new Date(tx.createdAt).toLocaleDateString()}</TableCell>
               </TableRow>
               {expandedId === tx.id && (
                 <TableRow key={`${tx.id}-items`}>
-                  <TableCell colSpan={7} className="bg-muted/30 p-4">
+                  <TableCell colSpan={8} className="bg-muted/30 p-4">
                     <OrderItemsTable items={tx.items ?? []} />
                   </TableCell>
                 </TableRow>
