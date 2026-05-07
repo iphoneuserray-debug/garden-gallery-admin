@@ -1,19 +1,12 @@
 import { useState } from "react"
-import { ChevronUpIcon, ChevronDownIcon, ChevronsUpDownIcon, PlusIcon, Trash2Icon, PencilIcon } from "lucide-react"
+import { PlusIcon, Trash2Icon, PencilIcon } from "lucide-react"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
 import { SearchForm } from "@/components/search-form"
-
-function SortableHead({ label, field, sort, onSort }) {
-  const active = sort.field === field
-  const Icon = !active ? ChevronsUpDownIcon : sort.dir === "asc" ? ChevronUpIcon : ChevronDownIcon
-  return (
-    <TableHead className="cursor-pointer select-none" onClick={() => onSort(field)}>
-      <div className="flex items-center gap-1">{label}<Icon className="size-3.5 opacity-50" /></div>
-    </TableHead>
-  )
-}
+import { SortableHead } from "@/components/SortableHead"
+import { DeleteConfirmModal } from "@/components/DeleteConfirmModal"
+import { inputCls } from "@/lib/table-utils"
 
 const EMPTY = { code: "", type: "percent", value: "", minOrderAud: "", active: true }
 
@@ -43,8 +36,6 @@ export function CouponsTable({ coupons = [], onUpdate, onAdd, onDelete }) {
   const set = (key) => (e) => setEditValues((v) => ({ ...v, [key]: key === "active" ? e.target.checked : e.target.value }))
   const setNew = (key) => (e) => setNewValues((v) => ({ ...v, [key]: key === "active" ? e.target.checked : e.target.value }))
   const saveNew = () => { onAdd?.({ ...newValues, value: parseFloat(newValues.value), minOrderAud: newValues.minOrderAud !== "" ? parseFloat(newValues.minOrderAud) : undefined }); setNewValues(EMPTY); setAdding(false) }
-
-  const inputCls = "w-full rounded border border-input bg-background px-2 py-1 text-sm"
 
   return (
     <div className="space-y-4">
@@ -134,18 +125,12 @@ export function CouponsTable({ coupons = [], onUpdate, onAdd, onDelete }) {
       </Table>
 
       {deletingCoupon && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-sm rounded-lg bg-background p-6 shadow-lg">
-            <h2 className="text-base font-semibold">删除优惠券？</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              <span className="font-mono font-semibold text-foreground">{deletingCoupon.code}</span> 将被永久删除。
-            </p>
-            <div className="mt-4 flex justify-end gap-2">
-              <button onClick={() => setDeletingCoupon(null)} className="rounded border px-3 py-1.5 text-sm">取消</button>
-              <button onClick={() => { onDelete?.(deletingCoupon.id); setDeletingCoupon(null) }} className="rounded bg-destructive px-3 py-1.5 text-sm text-destructive-foreground">删除</button>
-            </div>
-          </div>
-        </div>
+        <DeleteConfirmModal
+          title="删除优惠券？"
+          description={<><span className="font-mono font-semibold text-foreground">{deletingCoupon.code}</span> 将被永久删除。</>}
+          onConfirm={() => { onDelete?.(deletingCoupon.id); setDeletingCoupon(null) }}
+          onCancel={() => setDeletingCoupon(null)}
+        />
       )}
     </div>
   )

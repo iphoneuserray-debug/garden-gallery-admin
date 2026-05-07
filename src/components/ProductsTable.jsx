@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Link } from "react-router"
-import { ChevronUpIcon, ChevronDownIcon, ChevronsUpDownIcon, PlusIcon, Trash2Icon, PencilIcon, XIcon, ImagesIcon } from "lucide-react"
+import { PlusIcon, Trash2Icon, PencilIcon, XIcon, ImagesIcon } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -12,8 +12,9 @@ import {
 import { SearchForm } from "@/components/search-form"
 import { ProductImagesTable } from "@/components/ProductImagesTable"
 import { Pagination } from "@/components/Pagination"
-
-const PAGE_SIZE = 10
+import { SortableHead } from "@/components/SortableHead"
+import { DeleteConfirmModal } from "@/components/DeleteConfirmModal"
+import { PAGE_SIZE } from "@/lib/table-utils"
 
 function TagEditor({ value = [], onChange, allTags = [] }) {
   const [input, setInput] = useState("")
@@ -72,18 +73,6 @@ function TagEditor({ value = [], onChange, allTags = [] }) {
   )
 }
 
-function SortableHead({ label, field, sort, onSort }) {
-  const active = sort.field === field
-  const Icon = !active ? ChevronsUpDownIcon : sort.dir === "asc" ? ChevronUpIcon : ChevronDownIcon
-  return (
-    <TableHead className="cursor-pointer select-none" onClick={() => onSort(field)}>
-      <div className="flex items-center gap-1">
-        {label}
-        <Icon className="size-3.5 opacity-50" />
-      </div>
-    </TableHead>
-  )
-}
 
 const EMPTY_PRODUCT = { name: "", description: "", priceAud: "", availability: true, tags: [] }
 
@@ -305,23 +294,12 @@ export function ProductsTable({ products = [], onUpdate, onAdd, onDelete, onImag
       <Pagination page={page} totalPages={totalPages} total={sorted.length} pageSize={PAGE_SIZE} onChange={setPage} />
 
       {deletingProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-sm rounded-lg bg-background p-6 shadow-lg">
-            <h2 className="text-base font-semibold">删除商品？</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">{deletingProduct.name}</span> 将被永久删除，此操作不可撤销。
-            </p>
-            <div className="mt-4 flex justify-end gap-2">
-              <button onClick={() => setDeletingProduct(null)} className="rounded border px-3 py-1.5 text-sm">取消</button>
-              <button
-                onClick={() => { onDelete?.(deletingProduct.id); setDeletingProduct(null) }}
-                className="rounded bg-destructive px-3 py-1.5 text-sm text-destructive-foreground"
-              >
-                删除
-              </button>
-            </div>
-          </div>
-        </div>
+        <DeleteConfirmModal
+          title="删除商品？"
+          description={<><span className="font-medium text-foreground">{deletingProduct.name}</span> 将被永久删除，此操作不可撤销。</>}
+          onConfirm={() => { onDelete?.(deletingProduct.id); setDeletingProduct(null) }}
+          onCancel={() => setDeletingProduct(null)}
+        />
       )}
     </div>
   )

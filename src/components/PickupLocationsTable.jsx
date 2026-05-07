@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ChevronUpIcon, ChevronDownIcon, ChevronsUpDownIcon, PlusIcon, Trash2Icon, PencilIcon } from "lucide-react"
+import { PlusIcon, Trash2Icon, PencilIcon } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -9,19 +9,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { SearchForm } from "@/components/search-form"
-
-function SortableHead({ label, field, sort, onSort }) {
-  const active = sort.field === field
-  const Icon = !active ? ChevronsUpDownIcon : sort.dir === "asc" ? ChevronUpIcon : ChevronDownIcon
-  return (
-    <TableHead className="cursor-pointer select-none" onClick={() => onSort(field)}>
-      <div className="flex items-center gap-1">
-        {label}
-        <Icon className="size-3.5 opacity-50" />
-      </div>
-    </TableHead>
-  )
-}
+import { SortableHead } from "@/components/SortableHead"
+import { DeleteConfirmModal } from "@/components/DeleteConfirmModal"
+import { inputCls } from "@/lib/table-utils"
 
 const EMPTY = { name: "", address: "", active: true }
 
@@ -77,8 +67,6 @@ export function PickupLocationsTable({ locations = [], onUpdate, onAdd, onDelete
     setNewValues(EMPTY)
     setAdding(false)
   }
-
-  const inputCls = "w-full rounded border border-input bg-background px-2 py-1 text-sm"
 
   return (
     <div className="space-y-4">
@@ -165,23 +153,12 @@ export function PickupLocationsTable({ locations = [], onUpdate, onAdd, onDelete
       </Table>
 
       {deletingLocation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-sm rounded-lg bg-background p-6 shadow-lg">
-            <h2 className="text-base font-semibold">删除取货点？</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">{deletingLocation.name}</span> 将被永久删除，此操作不可撤销。
-            </p>
-            <div className="mt-4 flex justify-end gap-2">
-              <button onClick={() => setDeletingLocation(null)} className="rounded border px-3 py-1.5 text-sm">取消</button>
-              <button
-                onClick={() => { onDelete?.(deletingLocation.id); setDeletingLocation(null) }}
-                className="rounded bg-destructive px-3 py-1.5 text-sm text-destructive-foreground"
-              >
-                删除
-              </button>
-            </div>
-          </div>
-        </div>
+        <DeleteConfirmModal
+          title="删除取货点？"
+          description={<><span className="font-medium text-foreground">{deletingLocation.name}</span> 将被永久删除，此操作不可撤销。</>}
+          onConfirm={() => { onDelete?.(deletingLocation.id); setDeletingLocation(null) }}
+          onCancel={() => setDeletingLocation(null)}
+        />
       )}
     </div>
   )

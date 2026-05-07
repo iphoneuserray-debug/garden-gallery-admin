@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { ChevronUpIcon, ChevronDownIcon, ChevronsUpDownIcon } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -11,8 +10,8 @@ import {
 import { OrderItemsTable } from "@/components/OrderItemsTable"
 import { SearchForm } from "@/components/search-form"
 import { Pagination } from "@/components/Pagination"
-
-const PAGE_SIZE = 10
+import { SortableHead } from "@/components/SortableHead"
+import { PAGE_SIZE } from "@/lib/table-utils"
 
 const statusStyles = {
   pending: "text-yellow-600",
@@ -22,19 +21,6 @@ const statusStyles = {
 
 const STATUS_TABS = ["all", "paid", "pending", "failed"]
 const STATUS_TAB_LABELS = { all: "全部", paid: "已付款", pending: "待支付", failed: "失败" }
-
-function SortableHead({ label, field, sort, onSort }) {
-  const active = sort.field === field
-  const Icon = !active ? ChevronsUpDownIcon : sort.dir === "asc" ? ChevronUpIcon : ChevronDownIcon
-  return (
-    <TableHead className="cursor-pointer select-none" onClick={() => onSort(field)}>
-      <div className="flex items-center gap-1">
-        {label}
-        <Icon className="size-3.5 opacity-50" />
-      </div>
-    </TableHead>
-  )
-}
 
 export function TransactionsTable({ transactions = [], onStatusUpdate }) {
   const [expandedId, setExpandedId] = useState(null)
