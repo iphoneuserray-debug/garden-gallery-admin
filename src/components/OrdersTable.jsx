@@ -98,13 +98,21 @@ export function OrdersTable({ orders = [], onToggleCompleted }) {
                 </button>
               </div>
 
-              {/* Scheduled date */}
+              {/* Scheduled date + time */}
               {tx.scheduledDate && (
-                <div className="mx-4 mb-3 flex items-center gap-2 rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-sm dark:bg-amber-900/20 dark:border-amber-700">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">预约日期</span>
-                  <span className="ml-auto font-semibold text-amber-800 dark:text-amber-300">
-                    {new Date(tx.scheduledDate + "T00:00:00").toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric" })}
-                  </span>
+                <div className="mx-4 mb-3 rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-sm dark:bg-amber-900/20 dark:border-amber-700">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">预约配送</span>
+                    <span className="ml-auto font-semibold text-amber-800 dark:text-amber-300">
+                      {new Date(tx.scheduledDate + "T00:00:00").toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric" })}
+                    </span>
+                  </div>
+                  {tx.scheduledTime && (
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">配送时间</span>
+                      <span className="ml-auto font-semibold text-amber-800 dark:text-amber-300">{tx.scheduledTime}</span>
+                    </div>
+                  )}
                 </div>
               )}
 
