@@ -123,9 +123,9 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
               <TableCell>
                 <select value={newValues.gender} onChange={setNew("gender")} className={inputCls}>
                   <option value="">—</option>
-                  <option value="male">男</option>
-                  <option value="female">女</option>
-                  <option value="other">其他</option>
+                  <option value="Male">男</option>
+                  <option value="Female">女</option>
+                  <option value="Other">其他</option>
                 </select>
               </TableCell>
               <TableCell><input value={newValues.wechatNumber} onChange={setNew("wechatNumber")} placeholder="微信号" className={inputCls} /></TableCell>
@@ -164,9 +164,9 @@ export function CustomersTable({ customers = [], onUpdate, onAdd, onDelete }) {
                     ? (
                       <select value={editValues.gender} onChange={set("gender")} className={inputCls}>
                         <option value="">—</option>
-                        <option value="male">男</option>
-                        <option value="female">女</option>
-                        <option value="other">其他</option>
+                        <option value="Male">男</option>
+                        <option value="Female">女</option>
+                        <option value="Other">其他</option>
                       </select>
                     )
                     : (customer.gender ?? "—")}

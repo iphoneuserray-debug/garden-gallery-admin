@@ -40,11 +40,11 @@ function buildWeeklyData(orders, weeks = 12) {
   cutoff.setDate(cutoff.getDate() - weeks * 7)
 
   for (const order of orders) {
-    if (order.status !== "paid") continue
+    if (order.transaction?.status !== "paid") continue
     if (new Date(order.createdAt) < cutoff) continue
     const { sortKey, label } = getWeekMeta(order.createdAt)
     if (!map[sortKey]) map[sortKey] = { sortKey, label, revenue: 0 }
-    map[sortKey].revenue += Number(order.totalAud)
+    map[sortKey].revenue += Number(order.transaction.totalAud)
   }
 
   return Object.values(map)
@@ -66,7 +66,7 @@ export default function Dashboard() {
 
   const weeklyData = buildWeeklyData(orders)
   const totalRevenue = weeklyData.reduce((sum, w) => sum + w.revenue, 0)
-  const paidOrders = orders.filter((o) => o.status === "paid").length
+  const paidOrders = orders.filter((o) => o.transaction?.status === "paid").length
 
   return (
     <div className="p-6 space-y-6">
