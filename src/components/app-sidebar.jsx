@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router"
 import { ArrowLeftRightIcon, LayoutDashboardIcon, LogOutIcon, MapPinIcon, PackageIcon, ShoppingCartIcon, TagIcon, UsersIcon } from "lucide-react"
+import { clearToken } from "@/lib/api"
 import {
   Sidebar,
   SidebarContent,
@@ -27,6 +28,11 @@ const navItems = [
 export function AppSidebar({ ...props }) {
   const navigate = useNavigate()
 
+  const handleLogout = () => {
+    clearToken()
+    navigate("/login")
+  }
+
   return (
     <Sidebar {...props}>
       <SidebarContent>
@@ -52,7 +58,7 @@ export function AppSidebar({ ...props }) {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => navigate("/login")} className="text-muted-foreground hover:text-destructive">
+            <SidebarMenuButton onClick={handleLogout} className="text-muted-foreground hover:text-destructive">
               <LogOutIcon />
               <span>退出登录</span>
             </SidebarMenuButton>
