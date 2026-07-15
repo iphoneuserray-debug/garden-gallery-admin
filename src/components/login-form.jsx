@@ -31,6 +31,7 @@ export function LoginForm({
     e.preventDefault()
     setLoading(true)
     setError(null)
+    console.log(`[admin login] submitting email=${JSON.stringify(email)} password.length=${password.length}`)
     try {
       const { access_token } = await api.login(email, password)
       setToken(access_token)
@@ -59,6 +60,7 @@ export function LoginForm({
                 <Input
                   id="email"
                   type="email"
+                  autoComplete="email"
                   placeholder="m@example.com"
                   required
                   value={email}
@@ -72,6 +74,7 @@ export function LoginForm({
                 <Input
                   id="password"
                   type="password"
+                  autoComplete="current-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
